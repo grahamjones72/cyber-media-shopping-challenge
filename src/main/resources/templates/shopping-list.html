@@ -73,7 +73,7 @@
     <div class="shopping-list-header">
         <span>Item</span>
         <span>Price</span>
-        <span>Status</span>
+        <span>Purchased</span>
         <span>Up</span>
         <span>Down</span>
         <span></span>
@@ -99,11 +99,16 @@
                 No price
             </span>
 
-            <form th:action="@{/items/{id}/toggle(id=${item.id})}" method="post" class="item-action">
-                <button type="submit"
-                        th:text="${item.purchased} ? 'Unmark' : 'Purchased'">
-                    Purchased
-                </button>
+            <form th:action="@{/items/{id}/toggle(id=${item.id})}" method="post" class="item-action purchased-action">
+                <label class="checkbox-label">
+                    <input type="checkbox"
+                        th:checked="${item.purchased}"
+                        onchange="this.form.submit()">
+                </label>
+
+                <noscript>
+                    <button type="submit">Update</button>
+                </noscript>
             </form>
 
             <form th:action="@{/items/{id}/move-up(id=${item.id})}" method="post" class="item-action">
