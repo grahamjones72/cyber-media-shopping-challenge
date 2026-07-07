@@ -1,9 +1,10 @@
-package uk.co.graham.shopping.model;
+package uk.co.graham.shopping.list;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import uk.co.graham.shopping.user.AppUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;

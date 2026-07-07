@@ -1,4 +1,4 @@
-package uk.co.graham.shopping.model;
+package uk.co.graham.shopping.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

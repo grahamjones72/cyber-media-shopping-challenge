@@ -1,4 +1,4 @@
-package uk.co.graham.shopping.model;
+package uk.co.graham.shopping.list;
 
 import java.util.Locale;
 

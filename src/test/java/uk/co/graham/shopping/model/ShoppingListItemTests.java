@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import uk.co.graham.shopping.list.ShoppingListItem;
+
 public class ShoppingListItemTests {
 
     @Test
@@ -29,6 +31,7 @@ public class ShoppingListItemTests {
 
             assertEquals("apple", item1.getNormalisedName());
             assertEquals("apple", item2.getNormalisedName());
+            assertEquals("apple", item3.getNormalisedName());
 
     }
 
