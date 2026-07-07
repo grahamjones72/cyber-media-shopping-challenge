@@ -20,7 +20,7 @@ public class AppUser {
     private String displayName;
 
     protected AppUser() {
-    }   
+    }
 
     public AppUser(String username, String displayName) {
         this.username = username;
@@ -37,7 +37,7 @@ public class AppUser {
 
     public void setUsername(String username) {
         this.username = username;
-    }   
+    }
 
     public String getDisplayName() {
         return displayName;

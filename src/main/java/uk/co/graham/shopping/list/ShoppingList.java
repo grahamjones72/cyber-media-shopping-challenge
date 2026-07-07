@@ -17,17 +17,14 @@ public class ShoppingList {
     private Long id;
 
     @OneToOne(optional = false)
-    @JoinColumn(
-        name = "app_user_id",
-        nullable = false,
-        unique = true,
-        referencedColumnName = "id",
-        foreignKey = @ForeignKey(name = "FK_SHOPPING_LIST_APP_USER")
-    )
+    @JoinColumn(name = "app_user_id", nullable = false, unique = true, referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_SHOPPING_LIST_APP_USER"))
     private AppUser appUser;
 
     @Column(nullable = false, length = 100)
     private String name;
+
+    @Column
+    private Integer budgetInPence;
 
     protected ShoppingList() {
     }
@@ -57,5 +54,11 @@ public class ShoppingList {
         this.name = name;
     }
 
-    
+    public Integer getBudgetInPence() {
+        return budgetInPence;
+    }
+
+    public void setBudgetInPence(Integer budgetInPence) {
+        this.budgetInPence = budgetInPence;
+    }
 }

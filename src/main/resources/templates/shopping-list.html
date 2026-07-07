@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${shoppingListName}">Shopping List</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<h1 th:text="${shoppingListName}">Shopping List</h1>
+
+<div class="card">
+    <div class="summary">
+        <p>
+            Total:
+            <strong th:text="${'£' + #numbers.formatDecimal(totalPriceInPence / 100.0, 1, 2)}">
+                £0.00
+            </strong>
+        </p>
+
+        <p th:if="${budgetInPence != null}">
+            Budget:
+            <strong th:text="${'£' + #numbers.formatDecimal(budgetInPence / 100.0, 1, 2)}">
+                £0.00
+            </strong>
+        </p>
+
+        <p th:if="${budgetInPence == null}" class="muted">
+            No budget set.
+        </p>
+    </div>
+
+    <div th:if="${budgetExceeded}" class="warning">
+        Budget exceeded.
+    </div>
+
+    <div th:if="${errorMessage}" class="error" th:text="${errorMessage}">
+        Error message
+    </div>
+
+    <form th:action="@{/budget}" method="post" class="budget-form">
+        <label for="budgetInPounds">Budget</label>
+
+        <input type="number"
+               id="budgetInPounds"
+               name="budgetInPounds"
+               min="0"
+               step="0.01"
+               placeholder="Budget in pounds"
+               th:value="${budgetInPounds}">
+
+        <button type="submit">Set budget</button>
+    </form>
+</div>
+
+<div class="card">
+    <form th:action="@{/items}" method="post" class="add-item-form">
+        <input type="text"
+               name="name"
+               placeholder="Add item"
+               required>
+
+        <input type="number"
+               name="priceInPounds"
+               placeholder="Price in pounds"
+               min="0"
+               step="0.01">
+
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="shopping-list-header">
+        <span>Item</span>
+        <span>Price</span>
+        <span>Status</span>
+        <span>Up</span>
+        <span>Down</span>
+        <span></span>
+    </div>
+
+    <ul class="shopping-list">
+        <li th:each="item : ${items}" class="shopping-list-row">
+
+            <span class="item-name"
+                  th:text="${item.name}"
+                  th:classappend="${item.purchased} ? ' purchased' : ''">
+                Item name
+            </span>
+
+            <span class="item-price"
+                  th:if="${item.priceInPence != null}"
+                  th:text="${'£' + #numbers.formatDecimal(item.priceInPence / 100.0, 1, 2)}">
+                £0.00
+            </span>
+
+            <span class="item-price muted"
+                  th:if="${item.priceInPence == null}">
+                No price
+            </span>
+
+            <form th:action="@{/items/{id}/toggle(id=${item.id})}" method="post" class="item-action">
+                <button type="submit"
+                        th:text="${item.purchased} ? 'Unmark' : 'Purchased'">
+                    Purchased
+                </button>
+            </form>
+
+            <form th:action="@{/items/{id}/move-up(id=${item.id})}" method="post" class="item-action">
+                <button type="submit">↑</button>
+            </form>
+
+            <form th:action="@{/items/{id}/move-down(id=${item.id})}" method="post" class="item-action">
+                <button type="submit">↓</button>
+            </form>
+
+            <form th:action="@{/items/{id}/delete(id=${item.id})}" method="post" class="item-action delete-action">
+                <button type="submit" class="delete-button">Delete</button>
+            </form>
+
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

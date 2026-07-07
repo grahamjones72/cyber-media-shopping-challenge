@@ -1,4 +1,4 @@
-package uk.co.graham.shopping.list;
+package uk.co.graham.shopping.list.item;
 
 import java.util.Locale;
 
@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import uk.co.graham.shopping.list.ShoppingList;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -47,8 +48,8 @@ public class ShoppingListItem {
     @Column(nullable = false, length = 100)
     private String normalisedName;
 
-    @Column(nullable = false)
-    private Integer estimatedPriceInPence;
+    @Column(nullable = true)
+    private Integer priceInPence;
 
     @Column(nullable = false)
     private boolean purchased = false;
@@ -59,11 +60,11 @@ public class ShoppingListItem {
     protected ShoppingListItem() {
     }
 
-    public ShoppingListItem(ShoppingList shoppingList, String name, Integer estimatedPriceInPence, Integer displayOrder) {
+    public ShoppingListItem(ShoppingList shoppingList, String name, Integer priceInPence, Integer displayOrder) {
         this.shoppingList = shoppingList;
         this.name = name;
         this.normalisedName = normaliseName(name);
-        this.estimatedPriceInPence = estimatedPriceInPence;
+        this.priceInPence = priceInPence;
         this.displayOrder = displayOrder;
     }  
 
@@ -91,8 +92,8 @@ private static String normaliseName(String name) {
         return normalisedName;
     }
 
-    public Integer getEstimatedPriceInPence() {
-        return estimatedPriceInPence;
+    public Integer getPriceInPence() {
+        return priceInPence;
     }
 
     public boolean isPurchased() {
@@ -112,8 +113,8 @@ private static String normaliseName(String name) {
         this.normalisedName = normaliseName(name);
     }
 
-    public void setEstimatedPriceInPence(Integer estimatedPriceInPence) {
-        this.estimatedPriceInPence = estimatedPriceInPence;
+    public void setPriceInPence(Integer priceInPence) {
+        this.priceInPence = priceInPence;
     }
 
     public void setPurchased(boolean purchased) {
