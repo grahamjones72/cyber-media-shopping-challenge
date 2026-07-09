@@ -15,9 +15,10 @@ public interface ShoppingListItemRepository extends JpaRepository<ShoppingListIt
     Optional<ShoppingListItem> findByIdAndShoppingList(Long id, ShoppingList shoppingList);
 
     Optional<ShoppingListItem> findByShoppingListAndDisplayOrder(
-        ShoppingList shoppingList,
-        Integer displayOrder
-    );
+            ShoppingList shoppingList,
+            Integer displayOrder);
+
+    Optional<ShoppingListItem> findByIdAndShoppingList_AppUser_Username(Long id, String username);
 
     boolean existsByShoppingListAndNormalisedName(ShoppingList shoppingList, String normalisedName);
 }

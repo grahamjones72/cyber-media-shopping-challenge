@@ -152,6 +152,6 @@ public class ShoppingListItemService {
 
         return shoppingListItemRepository
                 .findByIdAndShoppingList(itemId, shoppingList)
-                .orElseThrow(() -> new IllegalArgumentException("Shopping list item not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Shopping list item not found for current user"));
     }
 }
