@@ -3,34 +3,31 @@ package uk.co.graham.shopping.list;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.co.graham.shopping.config.DefaultShoppingListConfig;
+import uk.co.graham.shopping.security.CurrentUserService;
 
 @Service
 public class ShoppingListService {
 
     private final ShoppingListRepository shoppingListRepository;
+    private final CurrentUserService currentUserService;
 
-    public ShoppingListService(ShoppingListRepository shoppingListRepository) {
+    public ShoppingListService(ShoppingListRepository shoppingListRepository, CurrentUserService currentUserService) {
         this.shoppingListRepository = shoppingListRepository;
+        this.currentUserService = currentUserService;
     }
 
     /**
-     * Retrieves the default shopping list for the default, unauthenticated user.
-     * This method is intended for use while user authentication is not yet
-     * implemented.
+     * Retrieves the shopping list for the authenticated user.
      *
-     * Later, this can be changed to retrieve the shopping list for the
-     * currently authenticated user.
-     *
-     * @return the current shopping list
+     * @return the current shopping list for the authenticated user
      */
     @Transactional(readOnly = true)
     public ShoppingList getCurrentShoppingList() {
+        String username = currentUserService.getCurrentUsername();
+
         return shoppingListRepository
-                .findByNameAndAppUserUsername(
-                        DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST,
-                        DefaultShoppingListConfig.DEFAULT_USERNAME)
-                .orElseThrow(() -> new IllegalStateException("Default shopping list not found"));
+                .findFirstByAppUser_Username(username)
+                .orElseThrow(() -> new IllegalStateException("Shopping list not found for user: " + username));
     }
 
     @Transactional

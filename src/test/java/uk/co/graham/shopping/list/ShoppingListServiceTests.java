@@ -1,6 +1,8 @@
 package uk.co.graham.shopping.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -12,72 +14,89 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import uk.co.graham.shopping.config.DefaultShoppingListConfig;
+import uk.co.graham.shopping.security.CurrentUserService;
 import uk.co.graham.shopping.user.AppUser;
 
 @ExtendWith(MockitoExtension.class)
 class ShoppingListServiceTests {
 
+    private static final String CURRENT_USERNAME = "graham";
+
     @Mock
     private ShoppingListRepository shoppingListRepository;
 
+    @Mock
+    private CurrentUserService currentUserService;
+
     private ShoppingListService shoppingListService;
 
-    private AppUser defaultUser;
-    private ShoppingList defaultShoppingList;
+    private AppUser currentUser;
+    private ShoppingList currentUserShoppingList;
 
     @BeforeEach
     void setUp() {
-        shoppingListService = new ShoppingListService(shoppingListRepository);
+        shoppingListService = new ShoppingListService(shoppingListRepository, currentUserService);
 
-        defaultUser = new AppUser(DefaultShoppingListConfig.DEFAULT_USERNAME,
-                DefaultShoppingListConfig.DEFAULT_USER_DISPLAY_NAME);
+        currentUser = new AppUser(
+                CURRENT_USERNAME,
+                "Graham",
+                "testpassword");
 
-        defaultShoppingList = new ShoppingList(defaultUser, DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST);
+        currentUserShoppingList = new ShoppingList(
+                currentUser,
+                "Graham's Shopping List");
     }
 
     @Test
-    void getCurrentShoppingListReturnsDefaultShoppingList() {
-        when(shoppingListRepository.findByNameAndAppUserUsername(
-                DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST,
-                DefaultShoppingListConfig.DEFAULT_USERNAME)).thenReturn(Optional.of(defaultShoppingList));
+    void getCurrentShoppingListReturnsCurrentUsersShoppingList() {
+        when(currentUserService.getCurrentUsername())
+                .thenReturn(CURRENT_USERNAME);
+
+        when(shoppingListRepository.findFirstByAppUser_Username(CURRENT_USERNAME))
+                .thenReturn(Optional.of(currentUserShoppingList));
 
         ShoppingList result = shoppingListService.getCurrentShoppingList();
 
-        assertEquals(defaultShoppingList, result);
+        assertSame(currentUserShoppingList, result);
     }
 
     @Test
-    void getCurrentShoppingListThrowsExceptionWhenDefaultListDoesNotExist() {
-        when(shoppingListRepository.findByNameAndAppUserUsername(
-                DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST,
-                DefaultShoppingListConfig.DEFAULT_USERNAME)).thenReturn(Optional.empty());
+    void getCurrentShoppingListThrowsExceptionWhenCurrentUserHasNoShoppingList() {
+        when(currentUserService.getCurrentUsername())
+                .thenReturn(CURRENT_USERNAME);
+
+        when(shoppingListRepository.findFirstByAppUser_Username(CURRENT_USERNAME))
+                .thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () -> shoppingListService.getCurrentShoppingList());
     }
 
     @Test
     void updateBudgetSetsBudgetInPence() {
-        when(shoppingListRepository.findByNameAndAppUserUsername(
-                DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST,
-                DefaultShoppingListConfig.DEFAULT_USERNAME)).thenReturn(Optional.of(defaultShoppingList));
+        when(currentUserService.getCurrentUsername())
+                .thenReturn(CURRENT_USERNAME);
+
+        when(shoppingListRepository.findFirstByAppUser_Username(CURRENT_USERNAME))
+                .thenReturn(Optional.of(currentUserShoppingList));
 
         shoppingListService.updateBudget(2500);
 
-        assertEquals(2500, defaultShoppingList.getBudgetInPence());
+        assertEquals(2500, currentUserShoppingList.getBudgetInPence());
     }
 
     @Test
     void updateBudgetAllowsNullBudget() {
-        defaultShoppingList.setBudgetInPence(2500);
+        currentUserShoppingList.setBudgetInPence(2500);
 
-        when(shoppingListRepository.findByNameAndAppUserUsername(
-                DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST,
-                DefaultShoppingListConfig.DEFAULT_USERNAME)).thenReturn(Optional.of(defaultShoppingList));
+        when(currentUserService.getCurrentUsername())
+                .thenReturn(CURRENT_USERNAME);
+
+        when(shoppingListRepository.findFirstByAppUser_Username(CURRENT_USERNAME))
+                .thenReturn(Optional.of(currentUserShoppingList));
 
         shoppingListService.updateBudget(null);
 
-        assertEquals(null, defaultShoppingList.getBudgetInPence());
+        assertNull(currentUserShoppingList.getBudgetInPence());
     }
 
     @Test

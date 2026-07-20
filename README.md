@@ -4,9 +4,11 @@
 
 This is a Spring Boot MVC shopping list application built for the Cyber Media developer coding challenge.
 
-The application allows a user to manage a shopping list, add manually entered items, record item prices, track the total cost of the list, set a budget, and receive a warning when the budget is exceeded.
+The application allows users to manage shopping lists, add manually entered items, record item prices, track the total cost of a list, set a budget, and receive a warning when the budget is exceeded.
 
-The submitted version uses a seeded default user and default shopping list. The data model links shopping lists to users so that the application can be extended later to support authenticated multi-user access.
+This feature branch adds Story 10 by introducing Spring Security login support. Three users are seeded for review and testing, and each user is associated with their own shopping list.
+
+The original submitted branch contains the core shopping list implementation without authentication. This branch keeps the Story 10 work separate so that it can be reviewed independently.
 
 ## Tech Stack
 
@@ -15,6 +17,7 @@ The submitted version uses a seeded default user and default shopping list. The 
 - Spring MVC
 - Thymeleaf
 - Spring Data JPA
+- Spring Security
 - H2 in-memory database
 - Maven
 - JUnit 5
@@ -41,6 +44,24 @@ Then open:
 http://localhost:8080
 ```
 
+### Login Details
+
+This feature branch adds Spring Security login support.
+
+The application seeds three users for testing:
+
+- `aaron`
+- `david`
+- `graham`
+
+Password for all seeded users:
+
+```text
+password
+```
+
+After login, each user is associated with their own seeded shopping list.
+
 ### Run the Tests
 
 ```bash
@@ -63,19 +84,25 @@ JDBC URL:
 jdbc:h2:mem:shoppingdb
 ```
 
+When Spring Security is enabled, the H2 console needs a small development-only security exception because it uses browser frames and does not follow the normal application CSRF flow.
+
+CSRF remains enabled for the main application, but is ignored for the H2 console only. Frame options are configured as same-origin so that the H2 console can render correctly during local development.
+
 ## Features Implemented
 
-- Seeded default user
-- Seeded default shopping list
+- Spring Security login support
+- Seeded test users: `aaron`, `david`, and `graham`
+- User-specific shopping lists after login
+- H2 console access configured for local development with Spring Security enabled
 - Display shopping list name from the database
 - Add free-text shopping list items
 - Store item prices internally in pence
-- Enter item prices in the UI as pounds and pence (e.g. `1.45`)
+- Enter item prices in the UI as pounds and pence, for example `1.45`
 - Display item prices as pounds and pence
 - Prevent duplicate items using a normalised item name
 - Delete items
-- Mark items as purchased / not purchased
-- Reorder items using move up / move down buttons
+- Mark items as purchased or not purchased
+- Reorder items using move up and move down buttons
 - Persist item display order
 - Calculate total list price
 - Set a shopping list budget
@@ -86,13 +113,13 @@ jdbc:h2:mem:shoppingdb
 
 ## Assumptions
 
-Shopping list items are added manually as free-text names. Prices are also entered manually by the user because the challenge brief does not require supermarket integration, automatic product lookup, or a product catalogue in the submitted version.
+Shopping list items are added manually as free-text names. Prices are also entered manually by the user because the challenge brief does not require supermarket integration, automatic product lookup, or a product catalogue.
 
 Prices are stored as integer pence values rather than decimal pounds. This avoids floating point precision issues when dealing with money-like values.
 
 Each item has a persisted display order so that the user's chosen order is retained when the list is reloaded.
 
-The application currently uses one seeded default user and one seeded default shopping list. This keeps the submitted solution simple while leaving the model ready for authenticated multi-user access later.
+The application uses seeded users for challenge review and demonstration purposes. It does not include user registration, password reset, or production-level account management.
 
 ## Validation and Error Handling
 
@@ -123,21 +150,23 @@ The tests cover key business rules such as:
 
 This level of testing was chosen to give confidence in the core business logic while keeping the solution appropriate for the time-limited nature of the challenge.
 
+## Stories Completed on This Feature Branch
+
+Story 10 has been implemented on this feature branch by adding Spring Security login support and seeded test users.
+
+This work has been kept separate from the originally submitted branch so that the original submission remains stable and reviewable, while the additional Story 10 implementation is also available for assessment.
+
 ## Stories Not Completed
 
-I decided not to implement Stories 9 and 10 in the submitted main branch.
-
-This was a scope-control decision. I wanted to focus on producing a working, understandable, and tested implementation of the core shopping list functionality rather than rushing additional features and reducing the overall quality of the submission.
-
-I intend to continue Stories 9 and 10 separately on a feature branch for my own learning and interest after submission.
+Story 9 has not been implemented.
 
 ## Technology Choices and Time Taken
 
-I spent a little longer than originally planned because I chose to use Thymeleaf and Mockito, both of which were less familiar to me than the core Java and Spring Boot parts of the stack.
+I spent a little longer than originally planned because I chose to use Thymeleaf, Mockito, and Spring Security, which were less familiar to me than the core Java and Spring Boot parts of the stack.
 
-I made this choice deliberately after learning that these technologies are relevant to Cyber Media. I felt it would be more beneficial in the long term to investigate and use them rather than avoiding them purely to save time.
+I made this choice deliberately after learning that these technologies are relevant to Cyber Media. I felt it would be more beneficial to investigate and use them rather than avoiding them purely to save time.
 
-The result is that the submitted solution reflects both the coding challenge requirements and some targeted learning around technologies that are likely to be useful in the role.
+The result is a solution that covers the core shopping list requirements while also showing targeted learning around technologies likely to be useful in the role.
 
 ## Use of AI Assistance
 
@@ -151,12 +180,13 @@ I used it to:
 - Generate some example code for speed and efficiency
 - Review and refine parts of the implementation and README
 
-All code included in the submitted solution has been reviewed, adapted, and understood by me before check-in.
+All code included in this solution has been reviewed, adapted, and understood by me before check-in.
 
 ## Known Limitations
 
-- Authentication is not implemented
-- The application currently uses a single seeded default user
+- Users are seeded for challenge/demo purposes rather than registered dynamically
+- The application uses Spring Security default form login rather than a custom login page
+- Passwords and seeded credentials are intended for local review/demo use only
 - The database is in-memory and resets when the application restarts
 - Item prices are manually entered by the user
 - There is no external product catalogue
@@ -168,10 +198,10 @@ All code included in the submitted solution has been reviewed, adapted, and unde
 
 Possible future improvements include:
 
-- Add Spring Security authentication
-- Allow each authenticated user to have their own shopping list
+- Implement Story 9
+- Add user registration
+- Add password reset/change password support
 - Add support for multiple shopping lists per user
-- Implement Stories 9 and 10 on a feature branch
 - Add product catalogue support
 - Seed products from an external open dataset
 - Add editing of existing item names and prices
@@ -187,8 +217,9 @@ The application separates the main responsibilities into controller, service, re
 - The controller handles HTTP requests and form submissions.
 - The service layer contains the business logic, including validation, duplicate checks, total price calculation, budget updates, and item ordering.
 - The repository layer uses Spring Data JPA for database access.
+- Spring Security handles authentication for the seeded users.
 
-The current shopping list is resolved through `ShoppingListService`, which currently returns the seeded default shopping list. This keeps the rest of the application isolated from how the current list is selected and should make future authentication support easier to add.
+The current shopping list is resolved through the service layer based on the logged-in user. This keeps the controller focused on handling web requests and keeps the user/list lookup logic away from the view layer.
 
 ## Money Handling
 
@@ -225,8 +256,8 @@ Each shopping list item has a `displayOrder` value.
 
 New items are added to the bottom of the list. When items are moved up or down, their display order values are swapped. When an item is deleted, the remaining items are renumbered so the ordering remains clean and predictable.
 
-## Submitted Branch
+## Branch Notes
 
-The submitted branch contains the completed core implementation described above.
+The original submitted branch contains the completed core implementation.
 
-Additional exploratory or unfinished work will be kept separate from the submitted solution.
+This feature branch adds Story 10 login support and keeps that additional work separate from the original submission.

@@ -19,12 +19,19 @@ public class AppUser {
     @Column(nullable = false, length = 100)
     private String displayName;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String role = "USER";
+
     protected AppUser() {
     }
 
-    public AppUser(String username, String displayName) {
+    public AppUser(String username, String displayName, String password) {
         this.username = username;
         this.displayName = displayName;
+        this.password = password;
     }
 
     public Long getId() {
@@ -35,15 +42,15 @@ public class AppUser {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRole() {
+        return role;
     }
 }

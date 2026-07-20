@@ -22,10 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.co.graham.shopping.list.ShoppingList;
 import uk.co.graham.shopping.list.ShoppingListService;
 import uk.co.graham.shopping.user.AppUser;
-import uk.co.graham.shopping.config.DefaultShoppingListConfig;
 
 @ExtendWith(MockitoExtension.class)
 class ShoppingListItemServiceTests {
+
+    private static final String CURRENT_USERNAME = "graham";
+    private static final String CURRENT_USER_DISPLAY_NAME = "Graham";
+    private static final String SHOPPING_LIST_NAME = "Graham's Shopping List";
 
     @Mock
     private ShoppingListItemRepository shoppingListItemRepository;
@@ -35,8 +38,8 @@ class ShoppingListItemServiceTests {
 
     private ShoppingListItemService shoppingListItemService;
 
-    private AppUser defaultUser;
-    private ShoppingList defaultShoppingList;
+    private AppUser currentUser;
+    private ShoppingList currentUserShoppingList;
 
     @BeforeEach
     void setUp() {
@@ -44,19 +47,27 @@ class ShoppingListItemServiceTests {
                 shoppingListItemRepository,
                 shoppingListService);
 
-        defaultUser = new AppUser(DefaultShoppingListConfig.DEFAULT_USERNAME,
-                DefaultShoppingListConfig.DEFAULT_USER_DISPLAY_NAME);
+        currentUser = new AppUser(
+                CURRENT_USERNAME,
+                CURRENT_USER_DISPLAY_NAME,
+                "testpassword");
 
-        defaultShoppingList = new ShoppingList(defaultUser, DefaultShoppingListConfig.DEFAULT_SHOPPING_LIST);
+        currentUserShoppingList = new ShoppingList(
+                currentUser,
+                SHOPPING_LIST_NAME);
     }
 
     @Test
     void addItemSavesNewItemWithPrice() {
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(defaultShoppingList, "milk"))
-                .thenReturn(false);
-        when(shoppingListItemRepository.findTopByShoppingListOrderByDisplayOrderDesc(defaultShoppingList))
-                .thenReturn(Optional.empty());
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(
+                currentUserShoppingList,
+                "milk")).thenReturn(false);
+
+        when(shoppingListItemRepository.findTopByShoppingListOrderByDisplayOrderDesc(
+                currentUserShoppingList)).thenReturn(Optional.empty());
 
         shoppingListItemService.addItem("Milk", 145);
 
@@ -71,7 +82,7 @@ class ShoppingListItemServiceTests {
         assertEquals(145, savedItem.getPriceInPence());
         assertEquals(1, savedItem.getDisplayOrder());
         assertFalse(savedItem.isPurchased());
-        assertEquals(defaultShoppingList, savedItem.getShoppingList());
+        assertEquals(currentUserShoppingList, savedItem.getShoppingList());
     }
 
     @Test
@@ -79,11 +90,15 @@ class ShoppingListItemServiceTests {
         ShoppingListItem existingItem = new ShoppingListItem();
         existingItem.setDisplayOrder(3);
 
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(defaultShoppingList, "eggs"))
-                .thenReturn(false);
-        when(shoppingListItemRepository.findTopByShoppingListOrderByDisplayOrderDesc(defaultShoppingList))
-                .thenReturn(Optional.of(existingItem));
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(
+                currentUserShoppingList,
+                "eggs")).thenReturn(false);
+
+        when(shoppingListItemRepository.findTopByShoppingListOrderByDisplayOrderDesc(
+                currentUserShoppingList)).thenReturn(Optional.of(existingItem));
 
         shoppingListItemService.addItem("Eggs", 250);
 
@@ -110,9 +125,12 @@ class ShoppingListItemServiceTests {
 
     @Test
     void addItemThrowsExceptionForDuplicateNormalisedName() {
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(defaultShoppingList, "milk"))
-                .thenReturn(true);
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.existsByShoppingListAndNormalisedName(
+                currentUserShoppingList,
+                "milk")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> shoppingListItemService.addItem("Milk", 145));
 
@@ -130,9 +148,11 @@ class ShoppingListItemServiceTests {
         ShoppingListItem unknownPriceItem = new ShoppingListItem();
         unknownPriceItem.setPriceInPence(null);
 
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.findByShoppingListOrderByDisplayOrderAsc(defaultShoppingList))
-                .thenReturn(List.of(milk, bread, unknownPriceItem));
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.findByShoppingListOrderByDisplayOrderAsc(
+                currentUserShoppingList)).thenReturn(List.of(milk, bread, unknownPriceItem));
 
         int result = shoppingListItemService.getTotalPriceInPence();
 
@@ -142,12 +162,15 @@ class ShoppingListItemServiceTests {
     @Test
     void togglePurchasedChangesItemFromNotPurchasedToPurchased() {
         ShoppingListItem item = new ShoppingListItem();
-        item.setShoppingList(defaultShoppingList);
+        item.setShoppingList(currentUserShoppingList);
         item.setPurchased(false);
 
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.findByIdAndShoppingList(10L, defaultShoppingList))
-                .thenReturn(Optional.of(item));
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.findByIdAndShoppingList(
+                10L,
+                currentUserShoppingList)).thenReturn(Optional.of(item));
 
         shoppingListItemService.togglePurchased(10L);
 
@@ -156,9 +179,12 @@ class ShoppingListItemServiceTests {
 
     @Test
     void togglePurchasedThrowsExceptionWhenItemDoesNotBelongToCurrentList() {
-        when(shoppingListService.getCurrentShoppingList()).thenReturn(defaultShoppingList);
-        when(shoppingListItemRepository.findByIdAndShoppingList(999L, defaultShoppingList))
-                .thenReturn(Optional.empty());
+        when(shoppingListService.getCurrentShoppingList())
+                .thenReturn(currentUserShoppingList);
+
+        when(shoppingListItemRepository.findByIdAndShoppingList(
+                999L,
+                currentUserShoppingList)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> shoppingListItemService.togglePurchased(999L));
     }

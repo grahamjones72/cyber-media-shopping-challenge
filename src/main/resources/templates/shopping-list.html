@@ -3,6 +3,10 @@
 <head>
     <title th:text="${shoppingListName}">Shopping List</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Sign out</button>
+    </form>
 </head>
 <body>
 
